@@ -32,6 +32,13 @@ Resources:
     DeletionPolicy: Retain
     Type: "AWS::S3::Bucket"
     Properties:
+      CorsConfiguration:
+        CorsRules:
+          -  AllowedHeaders: ['*']
+             AllowedMethods: ['GET']
+             AllowedOrigins: ['*']
+             Id: rule1
+             MaxAge: '3000'
       AccessControl: PublicRead
       WebsiteConfiguration:
         ErrorDocument: index.html
@@ -203,6 +210,11 @@ Outputs:
     Value: !GetAtt S3AppBucket.WebsiteURL
     Export: # added to export
       Name: sharedinf-appbucketurl
+  appbucket:
+    Description: App Bucket Name
+    Value: !Ref S3AppBucket
+    Export:
+      Name: sharedinf-appbucketname
   lambdabucket:
     Description: Shared Infrastructure Lambda Bucket
     Value: !Ref S3LambdaBucket
