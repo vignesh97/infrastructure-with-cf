@@ -1,3 +1,30 @@
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      -
+        Label:
+          default: "Shared Infrastructure Details"
+        Parameters:
+          - VPCID
+          - PUBLICRT
+          - PRIVATERTA
+          - PRIVATERTB
+          - APPBucketURL
+      -
+        Label:
+          default: "App Environment Networking"
+        Parameters:
+          - APPPublicCIDRA
+          - APPPublicCIDRB
+          - APPPrivateCIDRA
+          - APPPrivateCIDRB
+      -
+        Label:
+          default: "App Environment Configuration"
+        Parameters:
+          - ENVIRONMENT
+          - APPVERSION
+
 Parameters:
   VPCID: # this is the only parameter changed - AWS specific type
     Type: AWS::EC2::VPC::Id
