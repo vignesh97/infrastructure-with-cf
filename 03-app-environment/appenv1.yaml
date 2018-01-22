@@ -24,7 +24,9 @@ Metadata:
         Parameters:
           - ENVIRONMENT
           - APPVERSION
-
+    ParameterLabels:
+      VPCID:
+        default: "VPC to deploy into"
 Parameters:
   VPCID: # this is the only parameter changed - AWS specific type
     Type: AWS::EC2::VPC::Id
