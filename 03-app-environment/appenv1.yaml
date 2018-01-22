@@ -31,6 +31,8 @@ Metadata:
         default: "Source code URL"
       PUBLICRT:
         default: "Public Route Table Information"
+      APPVERSION:
+        default: "Enter application version"
 Parameters:
   VPCID: # this is the only parameter changed - AWS specific type
     Type: AWS::EC2::VPC::Id
