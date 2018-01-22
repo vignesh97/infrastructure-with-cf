@@ -1,6 +1,6 @@
 Parameters:
-  VPCID:
-    Type: String
+  VPCID: # this is the only parameter changed - AWS specific type
+    Type: AWS::EC2::VPC::Id
     Description: Shared Infrastructure VPC to use
   PUBLICRT:
     Type: String
