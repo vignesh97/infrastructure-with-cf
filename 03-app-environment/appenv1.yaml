@@ -29,6 +29,8 @@ Metadata:
         default: "VPC to deploy into"
       APPBucketURL:
         default: "Source code URL"
+      PUBLICRT:
+        default: "Public Route Table Information"
 Parameters:
   VPCID: # this is the only parameter changed - AWS specific type
     Type: AWS::EC2::VPC::Id
