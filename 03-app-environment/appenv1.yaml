@@ -3,14 +3,6 @@ Metadata:
     ParameterGroups:
       -
         Label:
-          default: "App Environment Networking"
-        Parameters:
-          - APPPublicCIDRA
-          - APPPublicCIDRB
-          - APPPrivateCIDRA
-          - APPPrivateCIDRB
-      -
-        Label:
           default: "App Environment Configuration"
         Parameters:
           - ENVIRONMENT
@@ -22,6 +14,7 @@ Parameters:
   APPVERSION:
     Type: String
     Description: Application Version to Deploy
+    Default: "1"
   ENVIRONMENT:
     Type: String
     Description: Type of environment to provision
@@ -43,34 +36,7 @@ Parameters:
     Type: String
     Description: Nominal Size of APP Env
     Default: "1"
-  APPPublicCIDRA:
-    Type: String
-    Description: CIDR to use for public subnet A for app environment.
-    MinLength: 9
-    MaxLength: 18
-    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
-    ConstraintDescription: Must be a valid CIDR range in the form x.x.x.x/22
-  APPPublicCIDRB:
-    Type: String
-    Description: CIDR to use for public subnet B for app environment.
-    MinLength: 9
-    MaxLength: 18
-    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
-    ConstraintDescription: Must be a valid CIDR range in the form x.x.x.x/22
-  APPPrivateCIDRA:
-    Type: String
-    Description: CIDR to use for public subnet A for app environment.
-    MinLength: 9
-    MaxLength: 18
-    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
-    ConstraintDescription: Must be a valid CIDR range in the form x.x.x.x/22
-  APPPrivateCIDRB:
-    Type: String
-    Description: CIDR to use for public subnet B for app environment.
-    MinLength: 9
-    MaxLength: 18
-    AllowedPattern: "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})"
-    ConstraintDescription: Must be a valid CIDR range in the form x.x.x.x/22
+
 Mappings:
   RegionMap:
     us-east-1:
@@ -111,6 +77,15 @@ Mappings:
     PRESALES:
       "EC2" : "t2.micro"
 Resources:
+  AutoSubnetCustomResource:
+    Type: "Custom::LambdaAutoSubnet" # or AWS::CloudFormation::CustomResource
+    Properties:
+      ServiceToken: !ImportValue sharedinf-autosubnetarn # The ARN of the lambda function - only mandatory property
+      # "Provider Defined Properties" Below..
+      DynamoDBRegion: !Ref "AWS::Region"
+      DynamoDBTable: !ImportValue sharedinf-autosubnetddbtablename
+      VPCCidr: !ImportValue sharedinf-vpciprange
+      Debug: "True"
   AutoScalingGroup:
     CreationPolicy:
       ResourceSignal:
@@ -213,28 +188,28 @@ Resources:
     Type: "AWS::EC2::Subnet"
     Properties:
       AvailabilityZone: !Select [0, !GetAZs ]
-      CidrBlock: !Ref APPPublicCIDRA
+      CidrBlock: !GetAtt AutoSubnetCustomResource.AppPublicCIDRA
       MapPublicIpOnLaunch: true
       VpcId: !ImportValue sharedinf-vpcid
   SubnetPrivateA: # Private Subnet for App Env in AZ - A
     Type: "AWS::EC2::Subnet"
     Properties:
       AvailabilityZone: !Select [0, !GetAZs ]
-      CidrBlock: !Ref APPPrivateCIDRA
+      CidrBlock: !GetAtt AutoSubnetCustomResource.AppPrivateCIDRA
       MapPublicIpOnLaunch: false
       VpcId: !ImportValue sharedinf-vpcid
   SubnetPublicB: # Public Subnet for App Env in AZ - B  (not used yet)
     Type: "AWS::EC2::Subnet"
     Properties:
       AvailabilityZone: !Select [1, !GetAZs ]
-      CidrBlock: !Ref APPPublicCIDRB
+      CidrBlock: !GetAtt AutoSubnetCustomResource.AppPublicCIDRB
       MapPublicIpOnLaunch: true
       VpcId: !ImportValue sharedinf-vpcid
   SubnetPrivateB: # Private Subnet for App Env in AZ - B (not used yet)
     Type: "AWS::EC2::Subnet"
     Properties:
       AvailabilityZone: !Select [1, !GetAZs ]
-      CidrBlock: !Ref APPPrivateCIDRB
+      CidrBlock: !GetAtt AutoSubnetCustomResource.AppPrivateCIDRB
       MapPublicIpOnLaunch: false
       VpcId: !ImportValue sharedinf-vpcid
   SubnetRouteTableAssociatePublicA: # Associates the subnet with a route table - passed via import
